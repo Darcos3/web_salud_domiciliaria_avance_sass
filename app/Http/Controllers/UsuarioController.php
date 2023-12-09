@@ -264,40 +264,48 @@ class UsuarioController extends Controller
 
         $user = \App\Models\User::find($id);
 
-        $user->fill([
-            'correo_electronico' => $request->correo_electronico,
-            'usuario' => $request->usuario,
-        ]);
-        $user->save();
-
-        if( $user->tipo == 1 ){
-            $paciente = Paciente::where('user_id', '=', $user->id)->get()->first();
-
-            $paciente->fill([
-                'nombre' => $request->nombre,
-                'apellidos' => $request->apellidos,
+        if($user != null){
+            $user->fill([
                 'correo_electronico' => $request->correo_electronico,
-                'num_celular' => $request->num_celular,
-                'ubicacion' => $request->ubicacion
+                'usuario' => $request->nombre_usuario,
             ]);
-            $paciente->save();
-        }else {
-            $profesional = Profesional::where('user_id', '=', $user->id)->get()->first();
-
-            $profesional->fill([
-                'nombre' => $request->nombre,
-                'apellidos' => $request->apellidos,
-                'correo_electronico' => $request->correo_electronico,
-                'num_celular' => $request->num_celular,
-                'ubicacion' => $request->ubicacion
+            $user->save();
+    
+            if( $user->tipo == 1 ){
+                $paciente = Paciente::where('user_id', '=', $user->id)->get()->first();
+    
+                $paciente->fill([
+                    'nombre' => $request->nombre,
+                    'apellidos' => $request->apellidos,
+                    'correo_electronico' => $request->correo_electronico,
+                    'num_celular' => $request->num_celular,
+                    'ubicacion' => $request->ubicacion
+                ]);
+                $paciente->save();
+            }else {
+                $profesional = Profesional::where('user_id', '=', $user->id)->get()->first();
+    
+                $profesional->fill([
+                    'nombre' => $request->nombre,
+                    'apellidos' => $request->apellidos,
+                    'correo_electronico' => $request->correo_electronico,
+                    'num_celular' => $request->num_celular,
+                    'ubicacion' => $request->ubicacion
+                ]);
+                $profesional->save();
+            }
+    
+            return response()->json([
+                'status' => true,
+                'usuario' => $user,
             ]);
-            $profesional->save();
         }
-
-        return response()->json([
-            'status' => true,
-            'usuario' => $user,
-        ]);
+        else {
+            return response()->json([
+                'status' => false,
+                'usuario' => null,
+            ]);
+        }
 
     }
 
@@ -306,16 +314,24 @@ class UsuarioController extends Controller
 
         $user = \App\Models\User::find($id);
 
-        $user->fill([
-            'password' => Hash::make($request->password),
-            'estado' => 1
-        ]);
-        $user->save();
-
-        return response()->json([
-            'status' => true,
-            'usuario' => $user,
-        ]);
+        if( $user != null){
+            $user->fill([
+                'password' => Hash::make($request->password),
+                'estado' => 1
+            ]);
+            $user->save();
+    
+            return response()->json([
+                'status' => true,
+                'usuario' => $user,
+            ]);
+        }
+        else {
+            return response()->json([
+                'status' => false,
+                'usuario' => null,
+            ]);
+        }
     }
 
 }
