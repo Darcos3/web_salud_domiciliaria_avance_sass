@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use \App\Models\Historia;
 use DataTables;
 use DB;
+use Storage;
 
 class HistoriaController extends Controller
 {
@@ -262,6 +263,7 @@ class HistoriaController extends Controller
                 'historias.consecutivo', 'historias.imagen', 'historias.fecha', 'historias.hora', 'historias.estado','historias.firma'
             )
             ->where('historias.id_profesional', '=', $profesional->id)
+            ->orderBy('id','desc')
             ->get();
 
             return response()->json([
@@ -322,17 +324,6 @@ class HistoriaController extends Controller
         ]);
         $historia->save();
 
-        if( $request->hasFile('imagen')){
-            $image = $request->file('imagen');
-            $imageName = $image->getClientOriginalName();
-            $image->move(public_path('storage/historias/'),$imageName);
-            
-            $historia->fill([
-                'imagen' => $imageName
-            ]);
-
-            $historia->save();
-        }
 
         return response()->json([
             'status' => true,
