@@ -8,10 +8,19 @@ use DataTables;
 use DB;
 use Storage;
 use Illuminate\Support\Str;
-use Kreait\Laravel\Firebase\Facades\Firebase;
-use Kreait\Firebase\Messaging\CloudMessage;
-use Kreait\Firebase\Messaging\Notification;
-use Kreait\Firebase\Messaging\ApnsConfig;
+use DateTime;
+use onesignal\client\api\DefaultApi;
+use onesignal\client\Configuration;
+use onesignal\client\model\GetNotificationRequestBody;
+use onesignal\client\model\Notification;
+use onesignal\client\model\StringMap;
+use onesignal\client\model\Player;
+use onesignal\client\model\UpdatePlayerTagsRequestBody;
+use onesignal\client\model\ExportPlayersRequestBody;
+use onesignal\client\model\Segment;
+use onesignal\client\model\FilterExpressions;
+use PHPUnit\Framework\TestCase;
+use GuzzleHttp;
 
 
 class HistoriaController extends Controller
@@ -342,20 +351,41 @@ class HistoriaController extends Controller
             $historia->save();
         }
 
-        $messaging = app('firebase.messaging');
+        $APP_ID = '2b570b2d-493d-4bcc-a2c8-54595cdd3ee8';
+        $APP_KEY_TOKEN = 'ZDJhZjJiMDYtNmIwOC00MGNmLWJmNjMtYTY4YzM3MDBlZDAz';
+        $USER_KEY_TOKEN = '6cbe4084c959d4e0caa1208fda3ade371307f019';
 
-        $message = CloudMessage::withTarget('topic', 'sd')
-            ->withNotification(Notification::create('Hay una nueva historia', 'Se ha creado la historia No. ' . $historia->id . '.'))
-            ->withApnsConfig(
-                ApnsConfig::new()
-                    ->withBadge(1)
-            );
+        $config = Configuration::getDefaultConfiguration()
+            ->setAppKeyToken($APP_KEY_TOKEN)
+            ->setUserKeyToken($USER_KEY_TOKEN);
 
-        $messaging->send($message);
+        $apiInstance = new DefaultApi(
+            new GuzzleHttp\Client(),
+            $config
+        );
 
+        function createNotification($enContent): Notification {
+            $content = new StringMap();
+            $content->setEn($enContent);
+        
+            $notification = new Notification();
+            $notification->setAppId('2b570b2d-493d-4bcc-a2c8-54595cdd3ee8');
+            $notification->setContents($content);
+            $notification->setIncludedSegments(['All']);
+        
+            return $notification;
+        }
+
+        $notification = createNotification('Se ha creado una nueva historia');
+
+        
+        $result = $apiInstance->createNotification($notification);        
+
+        
         return response()->json([
             'status' => true,
-            'historia' => $historia
+            'historia' => $historia,
+            'result' => $result
         ]);
         
     }
@@ -388,9 +418,40 @@ class HistoriaController extends Controller
             $historia->save();
         }
 
+        $APP_ID = '2b570b2d-493d-4bcc-a2c8-54595cdd3ee8';
+        $APP_KEY_TOKEN = 'ZDJhZjJiMDYtNmIwOC00MGNmLWJmNjMtYTY4YzM3MDBlZDAz';
+        $USER_KEY_TOKEN = '6cbe4084c959d4e0caa1208fda3ade371307f019';
+
+        $config = Configuration::getDefaultConfiguration()
+            ->setAppKeyToken($APP_KEY_TOKEN)
+            ->setUserKeyToken($USER_KEY_TOKEN);
+
+        $apiInstance = new DefaultApi(
+            new GuzzleHttp\Client(),
+            $config
+        );
+
+        function createNotification($enContent): Notification {
+            $content = new StringMap();
+            $content->setEn($enContent);
+        
+            $notification = new Notification();
+            $notification->setAppId('2b570b2d-493d-4bcc-a2c8-54595cdd3ee8');
+            $notification->setContents($content);
+            $notification->setIncludedSegments(['All']);
+        
+            return $notification;
+        }
+
+        $notification = createNotification('Se ha modificado los datos de la historia '.$historia->id);
+
+        
+        $result = $apiInstance->createNotification($notification); 
+
         return response()->json([
             'status' => true,
-            'historia' => $historia
+            'historia' => $historia,
+            'result' => $result
         ]);
         
     }
@@ -435,6 +496,36 @@ class HistoriaController extends Controller
             'firma' => 1,
         ]);
         $historia->save();
+
+        $APP_ID = '2b570b2d-493d-4bcc-a2c8-54595cdd3ee8';
+        $APP_KEY_TOKEN = 'ZDJhZjJiMDYtNmIwOC00MGNmLWJmNjMtYTY4YzM3MDBlZDAz';
+        $USER_KEY_TOKEN = '6cbe4084c959d4e0caa1208fda3ade371307f019';
+
+        $config = Configuration::getDefaultConfiguration()
+            ->setAppKeyToken($APP_KEY_TOKEN)
+            ->setUserKeyToken($USER_KEY_TOKEN);
+
+        $apiInstance = new DefaultApi(
+            new GuzzleHttp\Client(),
+            $config
+        );
+
+        function createNotification($enContent): Notification {
+            $content = new StringMap();
+            $content->setEn($enContent);
+        
+            $notification = new Notification();
+            $notification->setAppId('2b570b2d-493d-4bcc-a2c8-54595cdd3ee8');
+            $notification->setContents($content);
+            $notification->setIncludedSegments(['All']);
+        
+            return $notification;
+        }
+
+        $notification = createNotification('Se ha firmado satisfactoriamente la historia '.$historia->id);
+
+        
+        $result = $apiInstance->createNotification($notification); 
 
         return response()->json([
             'status' => true,
