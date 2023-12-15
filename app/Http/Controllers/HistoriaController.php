@@ -529,7 +529,8 @@ class HistoriaController extends Controller
 
         return response()->json([
             'status' => true,
-            'historia' => $historia
+            'historia' => $historia,
+            'result' => $result
         ]);
     }
 
