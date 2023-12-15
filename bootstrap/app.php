@@ -52,4 +52,6 @@ $app->singleton(
 |
 */
 
+$app->register(Kreait\Laravel\Firebase\ServiceProvider::class);
+
 return $app;

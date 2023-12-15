@@ -7,6 +7,12 @@ use \App\Models\Historia;
 use DataTables;
 use DB;
 use Storage;
+use Illuminate\Support\Str;
+use Kreait\Laravel\Firebase\Facades\Firebase;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
+use Kreait\Firebase\Messaging\ApnsConfig;
+
 
 class HistoriaController extends Controller
 {
@@ -324,6 +330,28 @@ class HistoriaController extends Controller
         ]);
         $historia->save();
 
+        if($request->imagen != null){
+            $image = $request->imagen;  // your base64 encoded
+            $image = str_replace('data:image/jpeg;base64,', '', $image);
+            $image = str_replace(' ', '+', $image);
+            $imageName = Str::random(8).'.'.'png';
+            // \File::put(storage_path(). '/historias/' . $imageName, base64_decode($image));
+            Storage::disk('public')->put($imageName, base64_decode($image));
+
+            $historia->imagen = $imageName;
+            $historia->save();
+        }
+
+        $messaging = app('firebase.messaging');
+
+        $message = CloudMessage::withTarget('topic', 'sd')
+            ->withNotification(Notification::create('Hay una nueva historia', 'Se ha creado la historia No. ' . $historia->id . '.'))
+            ->withApnsConfig(
+                ApnsConfig::new()
+                    ->withBadge(1)
+            );
+
+        $messaging->send($message);
 
         return response()->json([
             'status' => true,
@@ -348,15 +376,15 @@ class HistoriaController extends Controller
         ]);
         $historia->save();
 
-        if( $request->hasFile('imagen')){
-            $image = $request->file('imagen');
-            $imageName = $image->getClientOriginalName();
-            $image->move(public_path('storage/historias/'),$imageName);
-            
-            $historia->fill([
-                'imagen' => $imageName
-            ]);
+        if($request->imagen != null){
+            $image = $request->imagen;  // your base64 encoded
+            $image = str_replace('data:image/jpeg;base64,', '', $image);
+            $image = str_replace(' ', '+', $image);
+            $imageName = Str::random(8).'.'.'png';
+            // \File::put(storage_path(). '/historias/' . $imageName, base64_decode($image));
+            Storage::disk('public')->put($imageName, base64_decode($image));
 
+            $historia->imagen = $imageName;
             $historia->save();
         }
 
